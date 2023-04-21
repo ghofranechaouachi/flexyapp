@@ -1,26 +1,8 @@
-/*!
-
-=========================================================
-* Argon Dashboard React - v1.2.2
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-
 // reactstrap components
+import React from "react";
 import {
   Button,
   Card,
-  CardHeader,
   CardBody,
   FormGroup,
   Form,
@@ -32,7 +14,102 @@ import {
   Col
 } from "reactstrap";
 
+
+import axios from "axios";
+import {useState} from "react";
+import { Redirect, useHistory } from "react-router-dom";
+
 const Login = () => {
+
+
+  
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [isCandidate, setIsCandidate] = useState(false);
+  const [isCompany, setIsCompany] = useState(false);
+
+
+  const handleCheckboxChange = (event) => {
+    const { name, checked } = event.target;
+
+    if (name === "candidate") {
+      setIsCandidate(checked);
+    } else if (name === "company") {
+      setIsCompany(checked);
+    }
+  };
+
+
+
+  const history = useHistory()
+
+  const handleSignIn = (event) => {
+    event.preventDefault();
+
+    if (isCandidate) {
+      axios
+        .post("http://localhost:8282/api/v1/auth/authenticate", {
+          
+          email,
+          password,
+        })
+        .then((response) => {
+          console.log(response.data);
+          // Do something with the response
+          alert("Go to user interface");
+          if(response.data){
+            localStorage.setItem('userid', response.data.id)
+            localStorage.setItem('usertoken', response.data.token)
+            
+           
+            history.push("/user");
+            window.location.reload(false);
+            
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+          // Handle the error
+          alert('Invalid email or password');
+        });
+    } else if (isCompany) {
+      axios
+        .post("http://localhost:8282/api/v1/auth/authenticate/partner", {
+          
+          email,
+          password,
+        })
+        .then((response) => {
+          console.log(response.data);
+          // Do something with the response
+          alert("Go to Company dasboard");
+          if(response.data){
+            localStorage.setItem('companyid', response.data.id)
+            localStorage.setItem('partnertoken', response.data.token)
+            
+           
+            history.push("/admin");
+            window.location.reload(false);
+            
+          }
+        
+        })
+        .catch((error) => {
+          console.error(error);
+          // Handle the error
+          alert('Invalid email or password');
+        });
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+  }
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+  }
+
   return (
     <>
       <Col lg="5" md="7">
@@ -53,6 +130,8 @@ const Login = () => {
                     placeholder="Email"
                     type="email"
                     autoComplete="new-email"
+                    value={email}
+                    onChange={handleEmailChange}
                   />
                 </InputGroup>
               </FormGroup>
@@ -67,9 +146,46 @@ const Login = () => {
                     placeholder="Password"
                     type="password"
                     autoComplete="new-password"
+                    value={password}
+                    onChange={handlePasswordChange}
                   />
                 </InputGroup>
               </FormGroup>
+
+              <FormGroup>
+                      <Row>
+                        <Col>
+                          <div className="custom-control custom-checkbox mb-3">
+                            <input
+                              className="custom-control-input"
+                              id="candidate"
+                              name="candidate"
+                              type="checkbox"
+                              checked={isCandidate}
+                              onChange={handleCheckboxChange}
+                            />
+                            <label className="custom-control-label" htmlFor="candidate">
+                              I'm a candidate
+                            </label>
+                          </div>
+                        </Col>
+                        <Col>
+                          <div className="custom-control custom-checkbox mb-3">
+                            <input
+                              className="custom-control-input"
+                              id="company"
+                              name="company"
+                              type="checkbox"
+                              checked={isCompany}
+                              onChange={handleCheckboxChange}
+                            />
+                            <label className="custom-control-label" htmlFor="company">
+                              I'm a company
+                            </label>
+                          </div>
+                        </Col>
+                      </Row>
+                    </FormGroup>
               <div className="custom-control custom-control-alternative custom-checkbox">
                 <input
                   className="custom-control-input"
@@ -84,7 +200,7 @@ const Login = () => {
                 </label>
               </div>
               <div className="text-center">
-                <Button className="my-4" color="primary" type="button">
+                <Button className="my-4" color="primary" type="button" onClick={handleSignIn}>
                   Sign in
                 </Button>
               </div>

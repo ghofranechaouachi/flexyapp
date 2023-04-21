@@ -29,10 +29,32 @@ import UserLayout from "layouts/User.js";
 import UserProfileLayout from "layouts/UserProfile";
 import CompaniesLayout from "layouts/Companies.js";
 import JobsLayout from "layouts/JobsListing.js"
+import { useState , useEffect } from "react";
+
+import axios from "axios";
+
+
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
+
+
 root.render(
+
+ /* useEffect(()=>{
+    async function getClients(){
+      try{
+        const response = await axios.get("http://localhost:8282/api/v1/clients")
+        console.log(response.data);
+        setClients(response.data)
+        
+      }
+      catch(error){
+        console.log(error)
+      }
+    }
+    getClients();
+  },[])*/
   <BrowserRouter>
  <Switch>
  <Route path="/admin" render={(props) => <AdminLayout {...props} />} />

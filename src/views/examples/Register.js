@@ -1,22 +1,5 @@
-/*!
-
-=========================================================
-* Argon Dashboard React - v1.2.2
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-
-// reactstrap components
+import { useState } from "react";
+import axios from "axios";
 import {
   Button,
   Card,
@@ -29,20 +12,76 @@ import {
   InputGroupText,
   InputGroup,
   Row,
-  Col
+  Col,
 } from "reactstrap";
 
 const Register = () => {
+  const [firstName, setFirstname] = useState("");
+  const [lastName, setLastname] = useState("");
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isCandidate, setIsCandidate] = useState(false);
+  const [isCompany, setIsCompany] = useState(false);
+
+  const handleCheckboxChange = (event) => {
+    const { name, checked } = event.target;
+
+    if (name === "candidate") {
+      setIsCandidate(checked);
+    } else if (name === "company") {
+      setIsCompany(checked);
+    }
+  };
+
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+
+    if (isCandidate) {
+      axios
+        .post("http://localhost:8282/api/v1/auth/register", {
+          firstName,
+          lastName,
+          email,
+          password,
+        })
+        .then((response) => {
+          console.log(response.data);
+          // Do something with the response
+        })
+        .catch((error) => {
+          console.error(error);
+          // Handle the error
+        });
+    } else if (isCompany) {
+      axios
+        .post("http://localhost:8282/api/v1/auth/register/partner", {
+          firstName,
+          lastName,
+          email,
+          password,
+        })
+        .then((response) => {
+          console.log(response.data);
+          // Do something with the response
+        })
+        .catch((error) => {
+          console.error(error);
+          // Handle the error
+        });
+    }
+  };
+
   return (
     <>
       <Col lg="6" md="8">
         <Card className="bg-secondary shadow border-0">
-          
           <CardBody className="px-lg-5 py-lg-5">
-          <div className="text-muted text-center mt-2 mb-3">
+            <div className="text-muted text-center mt-2 mb-3">
               <h3>Register</h3>
             </div>
-            <Form role="form">
+            <Form role="form" onSubmit={handleFormSubmit}>
               <FormGroup>
                 <InputGroup className="input-group-alternative mb-3">
                   <InputGroupAddon addonType="prepend">
@@ -50,9 +89,31 @@ const Register = () => {
                       <i className="ni ni-hat-3" />
                     </InputGroupText>
                   </InputGroupAddon>
-                  <Input placeholder="Name" type="text" />
+                  <Input
+                    placeholder="Firstname"
+                    type="text"
+                    value={firstName}
+                    onChange={(event) => setFirstname(event.target.value)}
+                  />
                 </InputGroup>
               </FormGroup>
+
+              <FormGroup>
+                <InputGroup className="input-group-alternative mb-3">
+                  <InputGroupAddon addonType="prepend">
+                    <InputGroupText>
+                      <i className="ni ni-hat-3" />
+                    </InputGroupText>
+                  </InputGroupAddon>
+                  <Input
+                    placeholder="Lastname"
+                    type="text"
+                    value={lastName}
+                    onChange={(event) => setLastname(event.target.value)}
+                  />
+                </InputGroup>
+              </FormGroup>
+
               <FormGroup>
                 <InputGroup className="input-group-alternative mb-3">
                   <InputGroupAddon addonType="prepend">
@@ -64,9 +125,12 @@ const Register = () => {
                     placeholder="Email"
                     type="email"
                     autoComplete="new-email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
                   />
                 </InputGroup>
               </FormGroup>
+
               <FormGroup>
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
@@ -78,48 +142,74 @@ const Register = () => {
                     placeholder="Password"
                     type="password"
                     autoComplete="new-password"
-                  />
-                </InputGroup>
-              </FormGroup>
-              <div className="text-muted font-italic">
-                <small>
-                  password strength:{" "}
-                  <span className="text-success font-weight-700">strong</span>
-                </small>
-              </div>
-              <Row className="my-4">
-                <Col xs="12">
-                  <div className="custom-control custom-control-alternative custom-checkbox">
-                    <input
-                      className="custom-control-input"
-                      id="customCheckRegister"
-                      type="checkbox"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
                     />
-                    <label
-                      className="custom-control-label"
-                      htmlFor="customCheckRegister"
-                    >
-                      <span className="text-muted">
-                        I agree with the{" "}
-                        <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                          Privacy Policy
-                        </a>
-                      </span>
-                    </label>
-                  </div>
-                </Col>
-              </Row>
-              <div className="text-center">
-                <Button className="mt-4" color="primary" type="button">
-                  Create account
-                </Button>
-              </div>
-            </Form>
-          </CardBody>
-        </Card>
-      </Col>
-    </>
-  );
+                    </InputGroup>
+                    </FormGroup>
+
+                    <FormGroup>
+                      <InputGroup className="input-group-alternative">
+                        <InputGroupAddon addonType="prepend">
+                          <InputGroupText>
+                            <i className="ni ni-lock-circle-open" />
+                          </InputGroupText>
+                        </InputGroupAddon>
+                        <Input
+                          placeholder="Confirm Password"
+                          type="password"
+                          autoComplete="new-password"
+                          value={confirmPassword}
+                          onChange={(event) => setConfirmPassword(event.target.value)}
+                        />
+                      </InputGroup>
+                    </FormGroup>
+
+                    <FormGroup>
+                      <Row>
+                        <Col>
+                          <div className="custom-control custom-checkbox mb-3">
+                            <input
+                              className="custom-control-input"
+                              id="candidate"
+                              name="candidate"
+                              type="checkbox"
+                              checked={isCandidate}
+                              onChange={handleCheckboxChange}
+                            />
+                            <label className="custom-control-label" htmlFor="candidate">
+                              I'm a candidate
+                            </label>
+                          </div>
+                        </Col>
+                        <Col>
+                          <div className="custom-control custom-checkbox mb-3">
+                            <input
+                              className="custom-control-input"
+                              id="company"
+                              name="company"
+                              type="checkbox"
+                              checked={isCompany}
+                              onChange={handleCheckboxChange}
+                            />
+                            <label className="custom-control-label" htmlFor="company">
+                              I'm a company
+                            </label>
+                          </div>
+                        </Col>
+                      </Row>
+                    </FormGroup>
+                    <div className="text-center">
+                      <Button className="mt-4" color="primary" type="submit">
+                        Create account
+                      </Button>
+                    </div>
+                  </Form>
+                </CardBody>
+              </Card>
+            </Col>
+          </>
+          );
 };
 
 export default Register;

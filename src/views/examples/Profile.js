@@ -31,13 +31,75 @@ import {
 } from "reactstrap";
 // core components
 import UserHeader from "components/Headers/UserHeader.js";
+import axios from "axios";
+import { useState, useEffect } from "react";
+import {useHistory } from "react-router-dom";
 
 const Profile = () => {
+  const storedid = localStorage.getItem('companyid');
+  const storedtoken = localStorage.getItem('partnertoken');
+  const [user, setUser] = useState(null);
+  const history = useHistory();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get(`/api/v1/partners/${storedid}`, {
+          headers: { 
+            'Content-Type': 'application/json;charset=UTF-8',
+            "Access-Control-Allow-Origin": "*",
+            Accept: "application/json",
+            Authorization: `Bearer ${storedtoken}`
+          },
+          data: {}
+        });
+        setUser(response.data);
+        console.log(response.data)
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchUser();
+  }, [storedid, storedtoken]);
+
+  
+  const [updatedUser, setUpdatedUser] = useState({
+    businessName: "",
+    email: "",
+    firstName: "",
+    lastName: "",
+    businessLocation: "",
+    password: "",
+    description:"",
+    sector:"",
+    region:""
+
+  });
+    
+
+  const updateUser = (event) => {
+    event.preventDefault();
+   
+     
+
+     axios.put(`/api/v1/partners/${storedid}`, updatedUser).then(response => { 
+        console.log(response);
+        alert("Profile updated successfully!");
+      }).catch(error => {
+        console.log(error);
+        alert("Error updating Profile.");
+      });
+  };
+     
+      
+
   return (
     <>
        {/* User header */}
       <UserHeader />
+      
       {/* Page content */}
+      {user &&(
       <Container className="mt--7" fluid>
 
            {/* Profile description */}
@@ -76,26 +138,21 @@ const Profile = () => {
                 </Row>
                 <div className="text-center">
                   <h3>
-                    Jessica Jones
+                    {user.firstName} {user.lastName}
         
                   </h3>
                   <div className="h5 font-weight-300">
                     <i className="ni location_pin mr-2" />
-                    Bucharest, Romania
+                    {user.businessLocation}, {user.region}
                   </div>
-                  <div className="h5 mt-4">
-                    <i className="ni business_briefcase-24 mr-2" />
-                    Solution Manager - Creative Tim Officer
-                  </div>
+                 
                   <div>
                     <i className="ni education_hat mr-2" />
-                    University of Computer Science
+                    {user.sector}
                   </div>
                   <hr className="my-4" />
                   <p>
-                    Ryan — the name taken by Melbourne-raised, Brooklyn-based
-                    Nick Murphy — writes, performs and records all of his own
-                    music.
+                   {user.description}
                   </p>
                   
                 </div>
@@ -136,14 +193,17 @@ const Profile = () => {
                             className="form-control-label"
                             htmlFor="input-username"
                           >
-                            Username
+                            Business name 
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="lucky.jesse"
-                            id="input-username"
-                            placeholder="Username"
+                            id="businessName"
+                            placeholder={user.businessName}
                             type="text"
+                            value={updatedUser.businessName}
+                            onChange={(e) => {
+                              setUpdatedUser({ ...updatedUser, businessName: e.target.value });
+                            }}
                           />
                         </FormGroup>
                       </Col>
@@ -157,9 +217,13 @@ const Profile = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            id="input-email"
-                            placeholder="jesse@example.com"
+                            id="email"
+                            placeholder={user.email}
                             type="email"
+                            value={updatedUser.email}
+                            onChange={(e) => {
+                              setUpdatedUser({ ...updatedUser, email: e.target.value });
+                            }}
                           />
                         </FormGroup>
                       </Col>
@@ -175,10 +239,13 @@ const Profile = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="Lucky"
-                            id="input-first-name"
-                            placeholder="First name"
+                            id="firstName"
+                            placeholder={user.firstName}
                             type="text"
+                            value={updatedUser.firstName}
+                            onChange={(e) => {
+                              setUpdatedUser({ ...updatedUser, firstName: e.target.value });
+                            }}
                           />
                         </FormGroup>
                       </Col>
@@ -192,10 +259,52 @@ const Profile = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="Jesse"
-                            id="input-last-name"
-                            placeholder="Last name"
+                            id="lastName"
+                            placeholder={user.lastName}
                             type="text"
+                            value={updatedUser.lastName}
+                            onChange={(e) => {
+                              setUpdatedUser({ ...updatedUser, lastName: e.target.value });
+                            }}
+                          />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+
+                    <Row>
+                      <Col lg="6">
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-first-name"
+                          >
+                            Password
+                          </label>
+                          <Input
+                            className="form-control-alternative"
+                            id="password"
+                            placeholder="Password"
+                            type="password"
+                            value={updatedUser.password}
+                            onChange={(e) => {
+                              setUpdatedUser({ ...updatedUser, password: e.target.value });
+                            }}
+                          />
+                        </FormGroup>
+                      </Col>
+                      <Col lg="6">
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-last-name"
+                          >
+                            Confirm Password
+                          </label>
+                          <Input
+                            className="form-control-alternative"
+                           
+                            placeholder="Confirm Password"
+                            type="password"
                           />
                         </FormGroup>
                       </Col>
@@ -218,16 +327,19 @@ const Profile = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="Bld Mihail Kogalniceanu, nr. 8 Bl 1, Sc 1, Ap 09"
-                            id="input-address"
-                            placeholder="Home Address"
+                            id="businessLocation"
+                            placeholder={user.businessLocation}
                             type="text"
+                            value={updatedUser.businessLocation}
+                            onChange={(e) => {
+                              setUpdatedUser({ ...updatedUser, businessLocation: e.target.value });
+                            }}
                           />
                         </FormGroup>
                       </Col>
                     </Row>
                     <Row>
-                      <Col lg="4">
+                      <Col lg="6">
                         <FormGroup>
                           <label
                             className="form-control-label"
@@ -237,46 +349,38 @@ const Profile = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="New York"
-                            id="input-city"
-                            placeholder="City"
+                            id="region"
+                            placeholder={user.region}
                             type="text"
+                            value={updatedUser.region}
+                            onChange={(e) => {
+                              setUpdatedUser({ ...updatedUser, region: e.target.value });
+                            }}
                           />
                         </FormGroup>
                       </Col>
-                      <Col lg="4">
+                      <Col lg="6">
                         <FormGroup>
                           <label
                             className="form-control-label"
                             htmlFor="input-country"
                           >
-                            Country
+                            Sector
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="United States"
-                            id="input-country"
-                            placeholder="Country"
+                           
+                            id="sector"
+                            placeholder={user.sector}
                             type="text"
+                            value={updatedUser.sector}
+                            onChange={(e) => {
+                              setUpdatedUser({ ...updatedUser, sector: e.target.value });
+                            }}
                           />
                         </FormGroup>
                       </Col>
-                      <Col lg="4">
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-country"
-                          >
-                            Postal code
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-postal-code"
-                            placeholder="Postal code"
-                            type="number"
-                          />
-                        </FormGroup>
-                      </Col>
+                     
                     </Row>
                   </div>
                   <hr className="my-4" />
@@ -287,20 +391,34 @@ const Profile = () => {
                       <label>About Me</label>
                       <Input
                         className="form-control-alternative"
-                        placeholder="A few words about you ..."
+                        placeholder={user.description}
                         rows="4"
-                        defaultValue="A beautiful Dashboard for Bootstrap 4. It is Free and
-                        Open Source."
+                        id="description"
+                        
                         type="textarea"
+                        value={updatedUser.description}
+                        onChange={(e) => {
+                          setUpdatedUser({ ...updatedUser, description: e.target.value });
+                        }}
                       />
                     </FormGroup>
                   </div>
                 </Form>
+                <Col className="text-right" >
+                <Button
+                color="info"
+                href="#pablo"
+                onClick={updateUser}
+              >
+                Edit profile
+              </Button>
+              </Col>
               </CardBody>
             </Card>
           </Col>
         </Row>
       </Container>
+      )}
     </>
   );
 };

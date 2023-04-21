@@ -18,21 +18,48 @@
 
 // reactstrap components
 import { Card, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
-
+import axios from "axios";
+import { useState, useEffect } from "react";
+import {useHistory } from "react-router-dom";
 const Header = () => {
+  const storedid = localStorage.getItem('companyid');
+  const storedtoken = localStorage.getItem('partnertoken');
+  const [user, setUser] = useState(null);
+  const history = useHistory();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get(`/api/v1/partners/${storedid}`, {
+          headers: { 
+            'Content-Type': 'application/json;charset=UTF-8',
+            "Access-Control-Allow-Origin": "*",
+            Accept: "application/json",
+            Authorization: `Bearer ${storedtoken}`
+          },
+          data: {}
+        });
+        setUser(response.data);
+        console.log(response.data)
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchUser();
+  }, [storedid, storedtoken]);
   return (
     <>
       <div className="header bg-gradient-info pb-8 pt-5 pt-md-8">
       <Container className="d-flex align-items-center" fluid>
-          <Row>
+          <Row>{user &&(
             <Col lg="7" md="10">
-              <h1 className="display-2 text-white">Hello Jesse</h1>
+              <h1 className="display-2 text-white">Hello {user.firstName}</h1>
               <p className="text-white mt-0 mb-5">
                 This is your profile page. You can see the progress you've made
                 with your work and manage your projects or assigned tasks
               </p>
             
-            </Col>
+            </Col>)}
           </Row>
           </Container>
         <Container fluid>

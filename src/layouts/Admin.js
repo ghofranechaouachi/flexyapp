@@ -27,6 +27,10 @@ import Sidebar from "components/Sidebar/Sidebar.js";
 import routes from "routes.js";
 
 const Admin = (props) => {
+  const storedid = localStorage.getItem('companyid');
+  const storedtoken = localStorage.getItem('partnertoken');
+  console.log (storedid)
+  console.log(storedtoken)
   const mainContent = React.useRef(null);
   const location = useLocation();
 

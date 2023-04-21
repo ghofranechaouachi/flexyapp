@@ -1,21 +1,4 @@
-/*!
 
-=========================================================
-* Argon Dashboard React - v1.2.2
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-// reactstrap components
 import {
   Badge,
   Card,
@@ -37,13 +20,105 @@ import {
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.js";
+import { useEffect ,useState } from "react";
+import axios from "axios";
 
 const Tables = () => {
+
+  const storedid = localStorage.getItem('companyid');
+  const storedtoken = localStorage.getItem('partnertoken');
+  const [user, setUser] = useState(null);
+  const [jobs, setJobs] = useState(null);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [sector, setSector] = useState("");
+  const [salary, setSalary] = useState("");
+  const [workTime, setWorkTime] = useState("");
+  const [location, setLocation] = useState("");
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const response = await axios.get(`/partners/${storedid}/jobs`, {
+          headers: { 
+            'Content-Type': 'application/json;charset=UTF-8',
+            "Access-Control-Allow-Origin": "*",
+            Accept: "application/json",
+            Authorization: `Bearer ${storedtoken}`
+          },
+          data: {}
+        });
+        setJobs(response.data._embedded);
+        console.log(response.data)
+        console.log(response.data._embedded)
+        console.log(jobs)
+          } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchJobs();
+  }, [storedid, storedtoken]);
+
+
+
+
+
+
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get(`/api/v1/partners/${storedid}`, {
+          headers: { 
+            'Content-Type': 'application/json;charset=UTF-8',
+            "Access-Control-Allow-Origin": "*",
+            Accept: "application/json",
+            Authorization: `Bearer ${storedtoken}`
+          },
+          data: {}
+        });
+        setUser(response.data);
+        console.log(response.data)
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchUser();
+  }, [storedid, storedtoken]);
+
+  const handleFormSubmit = async() => {
+  
+  
+    try {
+      
+      const endpointUrl = `api/v1/jobs/addpartner/${storedid}`;
+      const response = await axios.post(endpointUrl, {
+        title,
+        description,
+        sector,
+        workTime,
+        location
+      }, {
+        headers: { 
+          'Content-Type': 'application/json;charset=UTF-8',
+          "Access-Control-Allow-Origin": "*",
+          Accept: "application/json",
+         
+          Authorization: `Bearer ${storedtoken}`
+        }
+      });
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+    }   
+  };
+  
   return (
     <>
     <div className="header bg-gradient-info pb-8 pt-5 pt-md-8">
      
       </div>
+      
       <Container className="mt--7" fluid>
        
       <Row>
@@ -57,8 +132,8 @@ const Tables = () => {
                   <Col className="text-right" xs="4">
                     <Button
                       color="primary"
-                      href="#pablo"
-                      onClick={(e) => e.preventDefault()}
+                     
+                      onClick={handleFormSubmit}
                       size="sm"
                     >
                       Add
@@ -85,10 +160,12 @@ const Tables = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="Lucky"
-                            id="input-first-name"
-                            placeholder="First name"
+                        
+                          
+                            placeholder="Title"
                             type="text"
+                            value={title}
+                            onChange={(event) => setTitle(event.target.value)}
                           />
                         </FormGroup></Col>
                         <Col lg="6">
@@ -101,14 +178,62 @@ const Tables = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="Jesse"
-                            id="input-last-name"
-                            placeholder="Last name"
+                           
+                          
+                            placeholder="300.00"
                             type="text"
+                            value={salary}
+                            onChange={(event) => {
+                              const value = event.target.value;
+                              const floatValue = parseFloat(value);
+                              ;
+                              setSalary(floatValue);
+                            }}
                           />
                         </FormGroup>
                       </Col>
                         </Row>
+
+                        <Row>
+                      <Col lg="6">
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-first-name"
+                          >
+                            Sector
+                          </label>
+                          <Input
+                            className="form-control-alternative"
+                        
+                           
+                            placeholder="Sector"
+                            type="text"
+                            value={sector}
+                            onChange={(event) => setSector(event.target.value)}
+                          />
+                        </FormGroup></Col>
+                        <Col lg="6">
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-last-name"
+                          >
+                            workTime
+                          </label>
+                          <Input
+                            className="form-control-alternative"
+                           
+                         
+                            placeholder="Lundi 5th Mar"
+                            type="text"
+                            value={workTime}
+                            onChange={(event) => setWorkTime(event.target.value)}
+                          />
+                        </FormGroup>
+                      </Col>
+                        </Row>
+
                     <Row>
                       <Col md="12">
                         <FormGroup>
@@ -120,10 +245,12 @@ const Tables = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="Bld Mihail Kogalniceanu, nr. 8 Bl 1, Sc 1, Ap 09"
-                            id="input-address"
+                            
+                          
                             placeholder="Home Address"
                             type="text"
+                            value={location}
+                            onChange={(event) => setLocation(event.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -135,11 +262,12 @@ const Tables = () => {
                       <label>Description</label>
                       <Input
                         className="form-control-alternative"
-                        placeholder="A few words about you ..."
+                        placeholder="A few words about the job ..."
                         rows="4"
-                        defaultValue="A beautiful Dashboard for Bootstrap 4. It is Free and
-                        Open Source."
+                       
                         type="textarea"
+                        value={description}
+                        onChange={(event) => setDescription(event.target.value)}
                       />
                     </FormGroup>
                   </div>
@@ -171,18 +299,19 @@ const Tables = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
+                {jobs && jobs.jobs.map((job) => (
+                  <tr key={job.id}>
                     <th scope="row">
                       <Media className="align-items-center">
         
                         <Media>
                           <span className="mb-0 text-sm">
-                            Argon Design System
+                          {job.title}
                           </span>
                         </Media>
                       </Media>
                     </th>
-                    <td>$2,500 USD</td>
+                    <td>{job.salary}</td>
                     <td>
                       <Badge color="" className="badge-dot mr-4">
                         <i className="bg-warning" />
@@ -203,7 +332,7 @@ const Tables = () => {
                       </div>
                     </td>
                  
-                  </tr>
+                  </tr>))}
                   </tbody></Table></CardBody>
               </Card>
           </div>
